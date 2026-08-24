@@ -1,0 +1,36 @@
+name: macOS build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - run: flutter analyze
+
+      - run: flutter test
+
+      - name: Enable macOS desktop support
+        run: flutter config --enable-macos-desktop
+
+      - run: flutter build macos --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flappy-cat-macos
+          path: build/macos/Build/Products/Release/*.app
+          if-no-files-found: error
